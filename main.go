@@ -3,13 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
 
 	cfgrtn "github.com/eugenshima/Balance/internal/config"
+	"github.com/eugenshima/Balance/internal/handlers"
 	"github.com/eugenshima/Balance/internal/repository"
 	"github.com/eugenshima/Balance/internal/service"
-	"github.com/sirupsen/logrus"
+	proto "github.com/eugenshima/Balance/proto"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 // NewDBPsql function provides Connection with PostgreSQL database
@@ -44,9 +48,16 @@ func main() {
 	}
 	pgx := repository.NewPsqlConnection(pool)
 	srv := service.NewBalanceService(pgx)
-	result, err := srv.GetAllBalances(context.TODO())
+	hndl := handlers.NewBalancehandler(srv)
+	lis, err := net.Listen("tcp", "127.0.0.1:8080")
 	if err != nil {
-		logrus.Errorf("GetAll: %v", err)
+		logrus.Fatalf("cannot create listener: %s", err)
 	}
-	fmt.Println(result[0])
+
+	serverRegistrar := grpc.NewServer()
+	proto.RegisterUserServiceServer(serverRegistrar, hndl)
+	err = serverRegistrar.Serve(lis)
+	if err != nil {
+		logrus.Fatalf("cannot start server: %s", err)
+	}
 }
