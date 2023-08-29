@@ -6,11 +6,11 @@ import (
 	"fmt"
 
 	"github.com/eugenshima/Balance/internal/model"
-	"github.com/sirupsen/logrus"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/sirupsen/logrus"
 )
 
 // PsqlConnection is a struct, which contains Pool variable
@@ -45,8 +45,8 @@ func (db *PsqlConnection) GetUserByID(ctx context.Context, userID uuid.UUID) (*m
 		}
 	}()
 	var user model.Balance
-	err = db.pool.QueryRow(ctx, "SELECT user_id, balance FROM shares.balance WHERE user_id = $1", userID).Scan(&user.User_ID, &user.Balance)
-	if err != nil || user.User_ID == uuid.Nil {
+	err = db.pool.QueryRow(ctx, "SELECT user_id, balance FROM shares.balance WHERE user_id = $1", userID).Scan(&user.UserID, &user.Balance)
+	if err != nil || user.UserID == uuid.Nil {
 		return nil, fmt.Errorf("QueryRow(): %w", err)
 	}
 	return &user, nil
@@ -85,7 +85,7 @@ func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.Balance, error) 
 	// go through each line
 	for rows.Next() {
 		user := &model.Balance{}
-		err := rows.Scan(&user.User_ID, &user.Balance)
+		err := rows.Scan(&user.UserID, &user.Balance)
 		if err != nil {
 			return nil, fmt.Errorf("Scan(): %w", err) // Returning error message
 		}
@@ -115,7 +115,7 @@ func (db *PsqlConnection) UpdateBalance(ctx context.Context, user *model.Balance
 			}
 		}
 	}()
-	tag, err := db.pool.Exec(ctx, "UPDATE shares.balance SET balance = $1 WHERE user_id = $2", user.Balance, user.User_ID)
+	tag, err := db.pool.Exec(ctx, "UPDATE shares.balance SET balance = $1 WHERE user_id = $2", user.Balance, user.UserID)
 	if err != nil || tag.RowsAffected() == 0 {
 		return fmt.Errorf("exec: %w", err)
 	}
@@ -143,7 +143,7 @@ func (db *PsqlConnection) CreateBalance(ctx context.Context, user *model.Balance
 			}
 		}
 	}()
-	_, err = db.pool.Exec(ctx, "INSERT INTO shares.balance VALUES ($1, $2)", user.User_ID, user.Balance)
+	_, err = db.pool.Exec(ctx, "INSERT INTO shares.balance VALUES ($1, $2)", user.UserID, user.Balance)
 	if err != nil {
 		return fmt.Errorf("exec: %w", err)
 	}

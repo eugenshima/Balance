@@ -1,3 +1,4 @@
+// Package repository contains repository tests in this case
 package repository
 
 import (
@@ -10,12 +11,14 @@ import (
 	"github.com/ory/dockertest"
 )
 
+// constants for pgx connection
 const (
 	pgUsername = "eugen"
 	pgPassword = "ur2qly1ini"
 	pgDB       = "balance_db"
 )
 
+// SetupTestPgx function to test pgx methods
 func SetupTestPgx() (*pgxpool.Pool, func(), error) {
 	pool, err := dockertest.NewPool("")
 	if err != nil {
@@ -28,22 +31,6 @@ func SetupTestPgx() (*pgxpool.Pool, func(), error) {
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not start resource: %w", err)
 	}
-
-	// cmd := exec.Command(
-	// 	"flyway",
-	// 	"-user="+pgUsername,
-	// 	"-password="+pgPassword,
-	// 	"-locations=filesystem:/home/yauhenishymanski/MyProject/myapp/migration",
-	// 	"-url=jdbc:postgresql://localhost:5432/eugene",
-	// 	"-connectRetries=10",
-	// 	"-schemas=goschema",
-	// 	"migrate",
-	// )
-
-	// err = cmd.Run()
-	// if err != nil {
-	// 	logrus.Fatalf("can't run migration: %s", err)
-	// }
 
 	dbURL := "postgres://eugen:ur2qly1ini@localhost:5432/balance_db"
 	cfg, err := pgxpool.ParseConfig(dbURL)
@@ -62,6 +49,7 @@ func SetupTestPgx() (*pgxpool.Pool, func(), error) {
 	return dbpool, cleanup, nil
 }
 
+// TestMain execute all tests
 func TestMain(m *testing.M) {
 	dbpool, cleanupPgx, err := SetupTestPgx()
 	if err != nil {

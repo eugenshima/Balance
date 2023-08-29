@@ -1,3 +1,4 @@
+// Package handlers contains handler tests in this case
 package handlers
 
 import (
@@ -7,6 +8,7 @@ import (
 
 	"github.com/eugenshima/Balance/internal/handlers/mocks"
 	"github.com/eugenshima/Balance/internal/model"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -15,7 +17,7 @@ import (
 var (
 	mockBalanceService *mocks.BalanceService
 	mockBalanceEntity  = model.Balance{
-		User_ID: uuid.New(),
+		UserID:  uuid.New(),
 		Balance: 1234.25,
 	}
 )
@@ -38,16 +40,18 @@ func TestCreateUserBalance(t *testing.T) {
 	require.True(t, assertion)
 }
 
+// TestDelete is a mocktest for Delete method of interface BalanceService
 func TestDelete(t *testing.T) {
 	mockBalanceService.On("DeleteBalance", mock.Anything, mock.AnythingOfType("uuid.UUID")).Return(nil).Once()
 
-	err := mockBalanceService.DeleteBalance(context.Background(), mockBalanceEntity.User_ID)
+	err := mockBalanceService.DeleteBalance(context.Background(), mockBalanceEntity.UserID)
 	require.NoError(t, err)
 
 	assertion := mockBalanceService.AssertExpectations(t)
 	require.True(t, assertion)
 }
 
+// TestGetAll is a mocktest for Get All method of interface BalanceService
 func TestGetAll(t *testing.T) {
 	mockBalanceService.On("GetAllBalances", mock.Anything).Return([]*model.Balance{}, nil).Twice()
 	handler := NewBalancehandler(mockBalanceService, nil)
@@ -65,6 +69,7 @@ func TestGetAll(t *testing.T) {
 	require.True(t, assertion)
 }
 
+// TestUpdate is a mocktest for Update method of interface BalanceService
 func TestUpdate(t *testing.T) {
 	mockBalanceService.On("UpdateBalance", mock.Anything, mock.AnythingOfType("*model.Balance")).Return(nil).Once()
 
@@ -75,10 +80,11 @@ func TestUpdate(t *testing.T) {
 	require.True(t, assertion)
 }
 
+// TestGetByID is a mocktest for Get By ID method of interface BalanceService
 func TestGetByID(t *testing.T) {
 	mockBalanceService.On("GetUserByID", mock.Anything, mock.AnythingOfType("uuid.UUID")).Return(&model.Balance{}, nil).Once()
 
-	result, err := mockBalanceService.GetUserByID(context.Background(), mockBalanceEntity.User_ID)
+	result, err := mockBalanceService.GetUserByID(context.Background(), mockBalanceEntity.UserID)
 	require.NoError(t, err)
 	require.NotNil(t, result)
 

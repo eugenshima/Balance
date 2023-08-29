@@ -7,10 +7,10 @@ import (
 
 	"github.com/eugenshima/Balance/internal/model"
 	proto "github.com/eugenshima/Balance/proto"
-	"github.com/sirupsen/logrus"
 
 	vld "github.com/go-playground/validator"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 // BalanceHandler struct represents a balance handler
@@ -39,7 +39,7 @@ type BalanceService interface {
 	DeleteBalance(ctx context.Context, userID uuid.UUID) error
 }
 
-// CustomValidate func validates your variables
+// CustomIDValidaion func validates your variables
 func (h *BalanceHandler) CustomIDValidaion(ctx context.Context, i interface{}) error {
 	err := h.vl.VarCtx(ctx, i, "required")
 	if err != nil {
@@ -65,7 +65,7 @@ func (h *BalanceHandler) UpdateUserBalance(ctx context.Context, req *proto.UserU
 		return nil, fmt.Errorf("parse: %w", err)
 	}
 	user := &model.Balance{
-		User_ID: ID,
+		UserID:  ID,
 		Balance: req.Balance.Balance,
 	}
 	err = h.srv.UpdateBalance(ctx, user)
@@ -95,7 +95,7 @@ func (h *BalanceHandler) GetUserByID(ctx context.Context, req *proto.UserGetByID
 	}
 
 	balance := &proto.Balance{
-		User_ID: result.User_ID.String(),
+		User_ID: result.UserID.String(),
 		Balance: result.Balance,
 	}
 	return &proto.UserGetByIDResponse{Balance: balance}, nil
@@ -104,7 +104,7 @@ func (h *BalanceHandler) GetUserByID(ctx context.Context, req *proto.UserGetByID
 // CreateUserBalance function creates a new user balance
 func (h *BalanceHandler) CreateUserBalance(ctx context.Context, req *proto.CreateBalanceRequest) (*proto.CreateBalanceResponse, error) {
 	user := &model.Balance{
-		User_ID: uuid.New(), //TODO: return to parsed UserID
+		UserID:  uuid.New(), //TODO: return to parsed UserID
 		Balance: req.Balance.Balance,
 	}
 	err := h.srv.CreateBalance(ctx, user)
@@ -145,7 +145,7 @@ func (h *BalanceHandler) GetAllUserBalances(ctx context.Context, _ *proto.GetAll
 	response := []*proto.Balance{}
 	for _, user := range users {
 		response = append(response, &proto.Balance{
-			User_ID: user.User_ID.String(),
+			User_ID: user.UserID.String(),
 			Balance: user.Balance,
 		})
 	}
