@@ -24,7 +24,7 @@ func NewPsqlConnection(pool *pgxpool.Pool) *PsqlConnection {
 }
 
 // GetUserByID function returns user information by ID
-func (db *PsqlConnection) GetUserByID(ctx context.Context, userID uuid.UUID) (*model.User, error) {
+func (db *PsqlConnection) GetUserByID(ctx context.Context, userID uuid.UUID) (*model.Balance, error) {
 	tx, err := db.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: "repeatable read"})
 	if err != nil {
 		return nil, fmt.Errorf("BeginTx: %w", err)
@@ -44,16 +44,16 @@ func (db *PsqlConnection) GetUserByID(ctx context.Context, userID uuid.UUID) (*m
 			}
 		}
 	}()
-	var user model.User
+	var user model.Balance
 	err = db.pool.QueryRow(ctx, "SELECT user_id, balance FROM shares.balance WHERE user_id = $1", userID).Scan(&user.User_ID, &user.Balance)
-	if err != nil {
+	if err != nil || user.User_ID == uuid.Nil {
 		return nil, fmt.Errorf("QueryRow(): %w", err)
 	}
 	return &user, nil
 }
 
 // GetAll function executes SQL request to select all rows from Database
-func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.User, error) {
+func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.Balance, error) {
 	tx, err := db.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: "repeatable read"})
 	if err != nil {
 		return nil, fmt.Errorf("BeginTx: %w", err)
@@ -80,11 +80,11 @@ func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.User, error) {
 	defer rows.Close()
 
 	// Create slice to store data from our SQL request
-	var results []*model.User
+	var results []*model.Balance
 
 	// go through each line
 	for rows.Next() {
-		user := &model.User{}
+		user := &model.Balance{}
 		err := rows.Scan(&user.User_ID, &user.Balance)
 		if err != nil {
 			return nil, fmt.Errorf("Scan(): %w", err) // Returning error message
@@ -95,7 +95,7 @@ func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.User, error) {
 }
 
 // UpdateBalance function updates user's balance information
-func (db *PsqlConnection) UpdateBalance(ctx context.Context, user *model.User) error {
+func (db *PsqlConnection) UpdateBalance(ctx context.Context, user *model.Balance) error {
 	tx, err := db.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: "repeatable read"})
 	if err != nil {
 		return fmt.Errorf("BeginTx: %w", err)
@@ -115,15 +115,15 @@ func (db *PsqlConnection) UpdateBalance(ctx context.Context, user *model.User) e
 			}
 		}
 	}()
-	_, err = db.pool.Exec(ctx, "UPDATE shares.balance SET balance = $1 WHERE user_id = $2", user.Balance, user.User_ID)
-	if err != nil {
+	tag, err := db.pool.Exec(ctx, "UPDATE shares.balance SET balance = $1 WHERE user_id = $2", user.Balance, user.User_ID)
+	if err != nil || tag.RowsAffected() == 0 {
 		return fmt.Errorf("exec: %w", err)
 	}
 	return nil
 }
 
 // CreateBalance function creates user's balance
-func (db *PsqlConnection) CreateBalance(ctx context.Context, user *model.User) error {
+func (db *PsqlConnection) CreateBalance(ctx context.Context, user *model.Balance) error {
 	tx, err := db.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: "repeatable read"})
 	if err != nil {
 		return fmt.Errorf("BeginTx: %w", err)
@@ -171,8 +171,8 @@ func (db *PsqlConnection) DeleteBalance(ctx context.Context, userID uuid.UUID) e
 			}
 		}
 	}()
-	_, err = db.pool.Exec(ctx, "DELETE FROM shares.balance WHERE user_id = $1", userID)
-	if err != nil {
+	tag, err := db.pool.Exec(ctx, "DELETE FROM shares.balance WHERE user_id = $1", userID)
+	if err != nil || tag.RowsAffected() == 0 {
 		return fmt.Errorf("exec: %w", err)
 	}
 	return nil

@@ -20,30 +20,30 @@ func NewBalanceService(rps BalanceRepository) *BalanceService {
 
 // BalanceRepository represents a Balance Repository methods
 type BalanceRepository interface {
-	GetAll(ctx context.Context) ([]*model.User, error)
-	UpdateBalance(ctx context.Context, user *model.User) error
-	GetUserByID(ctx context.Context, userID uuid.UUID) (*model.User, error)
-	CreateBalance(ctx context.Context, user *model.User) error
+	GetAll(ctx context.Context) ([]*model.Balance, error)
+	UpdateBalance(ctx context.Context, user *model.Balance) error
+	GetUserByID(ctx context.Context, userID uuid.UUID) (*model.Balance, error)
+	CreateBalance(ctx context.Context, user *model.Balance) error
 	DeleteBalance(ctx context.Context, userID uuid.UUID) error
 }
 
 // GetAllBalances function returns Get All repository method
-func (s *BalanceService) GetAllBalances(ctx context.Context) ([]*model.User, error) {
+func (s *BalanceService) GetAllBalances(ctx context.Context) ([]*model.Balance, error) {
 	return s.rps.GetAll(ctx)
 }
 
 // UpdateBalance function returns Update repository method
-func (s *BalanceService) UpdateBalance(ctx context.Context, user *model.User) error {
+func (s *BalanceService) UpdateBalance(ctx context.Context, user *model.Balance) error {
 	return s.rps.UpdateBalance(ctx, user)
 }
 
 // GetUserByID function returns Get By ID repository method
-func (s *BalanceService) GetUserByID(ctx context.Context, userID uuid.UUID) (*model.User, error) {
+func (s *BalanceService) GetUserByID(ctx context.Context, userID uuid.UUID) (*model.Balance, error) {
 	return s.rps.GetUserByID(ctx, userID)
 }
 
 // CreateBalance function returns Create repository method
-func (s *BalanceService) CreateBalance(ctx context.Context, user *model.User) error {
+func (s *BalanceService) CreateBalance(ctx context.Context, user *model.Balance) error {
 	return s.rps.CreateBalance(ctx, user)
 }
 
