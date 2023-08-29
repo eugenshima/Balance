@@ -7,7 +7,7 @@ import (
 
 // Config struct
 type Config struct {
-	PgxDBAddr string `env:"PGXCONN" envDefault:"postgres://eugen:ur2qly1ini@localhost:5432/eugene"`
+	PgxDBAddr string `env:"PGXCONN" envDefault:"postgres://eugen:ur2qly1ini@localhost:5432/balance_db"`
 }
 
 // NewConfig creates a new Config instance

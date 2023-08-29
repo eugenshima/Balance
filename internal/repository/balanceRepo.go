@@ -6,7 +6,9 @@ import (
 	"fmt"
 
 	"github.com/eugenshima/Balance/internal/model"
+	"github.com/sirupsen/logrus"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -22,20 +24,28 @@ func NewPsqlConnection(pool *pgxpool.Pool) *PsqlConnection {
 }
 
 // GetUserByID function returns user information by ID
-func (db *PsqlConnection) GetUserByID(ctx context.Context, userID string) (*model.User, error) {
+func (db *PsqlConnection) GetUserByID(ctx context.Context, userID uuid.UUID) (*model.User, error) {
 	tx, err := db.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: "repeatable read"})
 	if err != nil {
 		return nil, fmt.Errorf("BeginTx: %w", err)
 	}
 	defer func() {
 		if err != nil {
-			tx.Rollback(ctx)
+			err = tx.Rollback(ctx)
+			if err != nil {
+				logrus.Errorf("Rollback: %v", err)
+				return
+			}
 		} else {
-			tx.Commit(ctx)
+			err = tx.Commit(ctx)
+			if err != nil {
+				logrus.Errorf("Commit: %v", err)
+				return
+			}
 		}
 	}()
 	var user model.User
-	err = db.pool.QueryRow(ctx, "SELECT id, username, balance FROM shares.user WHERE id = $1", userID).Scan(&user.ID, &user.Username, &user.Balance)
+	err = db.pool.QueryRow(ctx, "SELECT user_id, balance FROM shares.balance WHERE user_id = $1", userID).Scan(&user.User_ID, &user.Balance)
 	if err != nil {
 		return nil, fmt.Errorf("QueryRow(): %w", err)
 	}
@@ -50,12 +60,20 @@ func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.User, error) {
 	}
 	defer func() {
 		if err != nil {
-			tx.Rollback(ctx)
+			err = tx.Rollback(ctx)
+			if err != nil {
+				logrus.Errorf("Rollback: %v", err)
+				return
+			}
 		} else {
-			tx.Commit(ctx)
+			err = tx.Commit(ctx)
+			if err != nil {
+				logrus.Errorf("Commit: %v", err)
+				return
+			}
 		}
 	}()
-	rows, err := db.pool.Query(ctx, "SELECT id, username, balance FROM shares.user")
+	rows, err := db.pool.Query(ctx, "SELECT user_id, balance FROM shares.balance")
 	if err != nil {
 		return nil, fmt.Errorf("Query(): %w", err)
 	}
@@ -67,7 +85,7 @@ func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.User, error) {
 	// go through each line
 	for rows.Next() {
 		user := &model.User{}
-		err := rows.Scan(&user.ID, &user.Username, &user.Balance)
+		err := rows.Scan(&user.User_ID, &user.Balance)
 		if err != nil {
 			return nil, fmt.Errorf("Scan(): %w", err) // Returning error message
 		}
@@ -84,12 +102,20 @@ func (db *PsqlConnection) UpdateBalance(ctx context.Context, user *model.User) e
 	}
 	defer func() {
 		if err != nil {
-			tx.Rollback(ctx)
+			err = tx.Rollback(ctx)
+			if err != nil {
+				logrus.Errorf("Rollback: %v", err)
+				return
+			}
 		} else {
-			tx.Commit(ctx)
+			err = tx.Commit(ctx)
+			if err != nil {
+				logrus.Errorf("Commit: %v", err)
+				return
+			}
 		}
 	}()
-	_, err = db.pool.Exec(ctx, "UPDATE shares.user SET balance = $1, username = $2 WHERE id = $3", user.Balance, user.Username, user.ID)
+	_, err = db.pool.Exec(ctx, "UPDATE shares.balance SET balance = $1 WHERE user_id = $2", user.Balance, user.User_ID)
 	if err != nil {
 		return fmt.Errorf("exec: %w", err)
 	}
@@ -104,12 +130,20 @@ func (db *PsqlConnection) CreateBalance(ctx context.Context, user *model.User) e
 	}
 	defer func() {
 		if err != nil {
-			tx.Rollback(ctx)
+			err = tx.Rollback(ctx)
+			if err != nil {
+				logrus.Errorf("Rollback: %v", err)
+				return
+			}
 		} else {
-			tx.Commit(ctx)
+			err = tx.Commit(ctx)
+			if err != nil {
+				logrus.Errorf("Commit: %v", err)
+				return
+			}
 		}
 	}()
-	_, err = db.pool.Exec(ctx, "INSERT INTO shares.user VALUES ($1, $2, $3)", user.ID, user.Username, user.Balance)
+	_, err = db.pool.Exec(ctx, "INSERT INTO shares.balance VALUES ($1, $2)", user.User_ID, user.Balance)
 	if err != nil {
 		return fmt.Errorf("exec: %w", err)
 	}
@@ -117,19 +151,27 @@ func (db *PsqlConnection) CreateBalance(ctx context.Context, user *model.User) e
 }
 
 // DeleteBalance function deletes user's balance
-func (db *PsqlConnection) DeleteBalance(ctx context.Context, userID string) error {
+func (db *PsqlConnection) DeleteBalance(ctx context.Context, userID uuid.UUID) error {
 	tx, err := db.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: "repeatable read"})
 	if err != nil {
 		return fmt.Errorf("BeginTx: %w", err)
 	}
 	defer func() {
 		if err != nil {
-			tx.Rollback(ctx)
+			err = tx.Rollback(ctx)
+			if err != nil {
+				logrus.Errorf("Rollback: %v", err)
+				return
+			}
 		} else {
-			tx.Commit(ctx)
+			err = tx.Commit(ctx)
+			if err != nil {
+				logrus.Errorf("Commit: %v", err)
+				return
+			}
 		}
 	}()
-	_, err = db.pool.Exec(ctx, "DELETE FROM shares.user WHERE id = $1", userID)
+	_, err = db.pool.Exec(ctx, "DELETE FROM shares.balance WHERE user_id = $1", userID)
 	if err != nil {
 		return fmt.Errorf("exec: %w", err)
 	}

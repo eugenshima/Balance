@@ -7,7 +7,6 @@ import (
 
 // User struct represents a user model
 type User struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username" validate:"required"`
-	Balance  float64   `json:"balance" validate:"required,min=-1,max=100000"`
+	User_ID uuid.UUID `json:"user_id"`
+	Balance float64   `json:"balance"`
 }

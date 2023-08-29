@@ -25,6 +25,8 @@ type UserServiceClient interface {
 	UpdateUserBalance(ctx context.Context, in *UserUpdateRequest, opts ...grpc.CallOption) (*UserUpdateResponse, error)
 	GetUserByID(ctx context.Context, in *UserGetByIDRequest, opts ...grpc.CallOption) (*UserGetByIDResponse, error)
 	CreateUserBalance(ctx context.Context, in *CreateBalanceRequest, opts ...grpc.CallOption) (*CreateBalanceResponse, error)
+	DeleteUserBalance(ctx context.Context, in *DeleteBalanceRequest, opts ...grpc.CallOption) (*DeleteBalanceResponse, error)
+	GetAllUserBalances(ctx context.Context, in *GetAllBalanceRequest, opts ...grpc.CallOption) (*GetAllBalanceResponse, error)
 }
 
 type userServiceClient struct {
@@ -62,6 +64,24 @@ func (c *userServiceClient) CreateUserBalance(ctx context.Context, in *CreateBal
 	return out, nil
 }
 
+func (c *userServiceClient) DeleteUserBalance(ctx context.Context, in *DeleteBalanceRequest, opts ...grpc.CallOption) (*DeleteBalanceResponse, error) {
+	out := new(DeleteBalanceResponse)
+	err := c.cc.Invoke(ctx, "/UserService/DeleteUserBalance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetAllUserBalances(ctx context.Context, in *GetAllBalanceRequest, opts ...grpc.CallOption) (*GetAllBalanceResponse, error) {
+	out := new(GetAllBalanceResponse)
+	err := c.cc.Invoke(ctx, "/UserService/GetAllUserBalances", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -69,6 +89,8 @@ type UserServiceServer interface {
 	UpdateUserBalance(context.Context, *UserUpdateRequest) (*UserUpdateResponse, error)
 	GetUserByID(context.Context, *UserGetByIDRequest) (*UserGetByIDResponse, error)
 	CreateUserBalance(context.Context, *CreateBalanceRequest) (*CreateBalanceResponse, error)
+	DeleteUserBalance(context.Context, *DeleteBalanceRequest) (*DeleteBalanceResponse, error)
+	GetAllUserBalances(context.Context, *GetAllBalanceRequest) (*GetAllBalanceResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -84,6 +106,12 @@ func (UnimplementedUserServiceServer) GetUserByID(context.Context, *UserGetByIDR
 }
 func (UnimplementedUserServiceServer) CreateUserBalance(context.Context, *CreateBalanceRequest) (*CreateBalanceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUserBalance not implemented")
+}
+func (UnimplementedUserServiceServer) DeleteUserBalance(context.Context, *DeleteBalanceRequest) (*DeleteBalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteUserBalance not implemented")
+}
+func (UnimplementedUserServiceServer) GetAllUserBalances(context.Context, *GetAllBalanceRequest) (*GetAllBalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllUserBalances not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -152,6 +180,42 @@ func _UserService_CreateUserBalance_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_DeleteUserBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBalanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).DeleteUserBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/UserService/DeleteUserBalance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).DeleteUserBalance(ctx, req.(*DeleteBalanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetAllUserBalances_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllBalanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetAllUserBalances(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/UserService/GetAllUserBalances",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetAllUserBalances(ctx, req.(*GetAllBalanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +234,14 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateUserBalance",
 			Handler:    _UserService_CreateUserBalance_Handler,
+		},
+		{
+			MethodName: "DeleteUserBalance",
+			Handler:    _UserService_DeleteUserBalance_Handler,
+		},
+		{
+			MethodName: "GetAllUserBalances",
+			Handler:    _UserService_GetAllUserBalances_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

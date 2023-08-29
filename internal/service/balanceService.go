@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/eugenshima/Balance/internal/model"
+	"github.com/google/uuid"
 )
 
 // BalanceService struct represents a Balance Service
@@ -21,9 +22,9 @@ func NewBalanceService(rps BalanceRepository) *BalanceService {
 type BalanceRepository interface {
 	GetAll(ctx context.Context) ([]*model.User, error)
 	UpdateBalance(ctx context.Context, user *model.User) error
-	GetUserByID(ctx context.Context, userID string) (*model.User, error)
+	GetUserByID(ctx context.Context, userID uuid.UUID) (*model.User, error)
 	CreateBalance(ctx context.Context, user *model.User) error
-	DeleteBalance(ctx context.Context, userID string) error
+	DeleteBalance(ctx context.Context, userID uuid.UUID) error
 }
 
 // GetAllBalances function returns Get All repository method
@@ -37,7 +38,7 @@ func (s *BalanceService) UpdateBalance(ctx context.Context, user *model.User) er
 }
 
 // GetUserByID function returns Get By ID repository method
-func (s *BalanceService) GetUserByID(ctx context.Context, userID string) (*model.User, error) {
+func (s *BalanceService) GetUserByID(ctx context.Context, userID uuid.UUID) (*model.User, error) {
 	return s.rps.GetUserByID(ctx, userID)
 }
 
@@ -47,6 +48,6 @@ func (s *BalanceService) CreateBalance(ctx context.Context, user *model.User) er
 }
 
 // DeleteBalance function returns Delete repository method
-func (s *BalanceService) DeleteBalance(ctx context.Context, userID string) error {
+func (s *BalanceService) DeleteBalance(ctx context.Context, userID uuid.UUID) error {
 	return s.rps.DeleteBalance(ctx, userID)
 }
