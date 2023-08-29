@@ -28,6 +28,8 @@ func NewBalancehandler(srv BalanceService, vl *vld.Validate) *BalanceHandler {
 	}
 }
 
+//go:generate /home/yauhenishymanski/work/bin/mockery --name=BalanceService --case=underscore --output=./mocks
+
 // BalanceService interface represents service methods
 type BalanceService interface {
 	GetAllBalances(ctx context.Context) ([]*model.Balance, error)

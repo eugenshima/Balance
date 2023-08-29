@@ -13,25 +13,13 @@ var rps *PsqlConnection
 
 var testEntity = model.Balance{
 	User_ID: uuid.New(),
-	Balance: 1234,
+	Balance: 1234.25,
 }
 
 var wrongTestEntity = model.Balance{
 	User_ID: uuid.Nil,
-	Balance: 1234,
+	Balance: 1234.75,
 }
-
-// func TestPgxCreate(t *testing.T) {
-// 	id, err := rps.(context.Background(), &testEntity)
-// 	require.NoError(t, err)
-// 	result, err := rps.GetByID(context.Background(), testEntity.ID)
-// 	require.NoError(t, err)
-// 	require.Equal(t, result, entityEugen.ID)
-// 	require.Equal(t, result.Name, entityEugen.Name)
-// 	deletedID, err := rps.Delete(context.Background(), id)
-// 	require.NotNil(t, deletedID)
-// 	require.NoError(t, err)
-// }
 
 func TestPgxCreateDeleteBalance(t *testing.T) {
 	err := rps.CreateBalance(context.Background(), &testEntity)
