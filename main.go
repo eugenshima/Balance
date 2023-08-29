@@ -1,3 +1,4 @@
+// Package main is an entry point to this microservice
 package main
 
 import (
@@ -11,6 +12,7 @@ import (
 	"github.com/eugenshima/Balance/internal/service"
 	proto "github.com/eugenshima/Balance/proto"
 
+	"github.com/go-playground/validator"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -35,20 +37,20 @@ func NewDBPsql(env string) (*pgxpool.Pool, error) {
 	return pool, nil
 }
 
+// main function of our microservice
 func main() {
 	cfg, err := cfgrtn.NewConfig()
 	if err != nil {
 		fmt.Printf("Error extracting env variables: %v", err)
 		return
 	}
-
 	pool, err := NewDBPsql(cfg.PgxDBAddr)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{"PgxDBAddr: ": cfg.PgxDBAddr}).Errorf("NewDBPsql: %v", err)
 	}
 	pgx := repository.NewPsqlConnection(pool)
 	srv := service.NewBalanceService(pgx)
-	hndl := handlers.NewBalancehandler(srv)
+	hndl := handlers.NewBalancehandler(srv, validator.New())
 	lis, err := net.Listen("tcp", "127.0.0.1:8080")
 	if err != nil {
 		logrus.Fatalf("cannot create listener: %s", err)
