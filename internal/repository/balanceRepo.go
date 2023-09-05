@@ -45,8 +45,8 @@ func (db *PsqlConnection) GetUserByID(ctx context.Context, userID uuid.UUID) (*m
 		}
 	}()
 	var user model.Balance
-	err = db.pool.QueryRow(ctx, "SELECT user_id, balance FROM shares.balance WHERE user_id = $1", userID).Scan(&user.UserID, &user.Balance)
-	if err != nil || user.UserID == uuid.Nil {
+	err = tx.QueryRow(ctx, "SELECT user_id, balance FROM shares.balance WHERE user_id = $1", userID).Scan(&user.BalanceID, &user.Balance)
+	if err != nil || user.BalanceID == uuid.Nil {
 		return nil, fmt.Errorf("QueryRow(): %w", err)
 	}
 	return &user, nil
@@ -73,7 +73,7 @@ func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.Balance, error) 
 			}
 		}
 	}()
-	rows, err := db.pool.Query(ctx, "SELECT user_id, balance FROM shares.balance")
+	rows, err := tx.Query(ctx, "SELECT user_id, balance FROM shares.balance")
 	if err != nil {
 		return nil, fmt.Errorf("Query(): %w", err)
 	}
@@ -85,7 +85,7 @@ func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.Balance, error) 
 	// go through each line
 	for rows.Next() {
 		user := &model.Balance{}
-		err := rows.Scan(&user.UserID, &user.Balance)
+		err := rows.Scan(&user.BalanceID, &user.Balance)
 		if err != nil {
 			return nil, fmt.Errorf("Scan(): %w", err) // Returning error message
 		}
@@ -115,7 +115,7 @@ func (db *PsqlConnection) UpdateBalance(ctx context.Context, user *model.Balance
 			}
 		}
 	}()
-	tag, err := db.pool.Exec(ctx, "UPDATE shares.balance SET balance = $1 WHERE user_id = $2", user.Balance, user.UserID)
+	tag, err := tx.Exec(ctx, "UPDATE shares.balance SET balance = $1 WHERE user_id = $2", user.Balance, user.BalanceID)
 	if err != nil || tag.RowsAffected() == 0 {
 		return fmt.Errorf("exec: %w", err)
 	}
@@ -143,7 +143,7 @@ func (db *PsqlConnection) CreateBalance(ctx context.Context, user *model.Balance
 			}
 		}
 	}()
-	_, err = db.pool.Exec(ctx, "INSERT INTO shares.balance VALUES ($1, $2)", user.UserID, user.Balance)
+	_, err = tx.Exec(ctx, "INSERT INTO shares.balance VALUES ($1, $2)", user.BalanceID, user.Balance)
 	if err != nil {
 		return fmt.Errorf("exec: %w", err)
 	}
@@ -171,7 +171,7 @@ func (db *PsqlConnection) DeleteBalance(ctx context.Context, userID uuid.UUID) e
 			}
 		}
 	}()
-	tag, err := db.pool.Exec(ctx, "DELETE FROM shares.balance WHERE user_id = $1", userID)
+	tag, err := tx.Exec(ctx, "DELETE FROM shares.balance WHERE user_id = $1", userID)
 	if err != nil || tag.RowsAffected() == 0 {
 		return fmt.Errorf("exec: %w", err)
 	}

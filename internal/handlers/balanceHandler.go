@@ -17,7 +17,7 @@ import (
 type BalanceHandler struct {
 	srv BalanceService
 	vl  *vld.Validate
-	proto.UnimplementedUserServiceServer
+	proto.UnimplementedBalanceServiceServer
 }
 
 // NewBalancehandler Creates a new BalanceHandler
@@ -54,19 +54,19 @@ func (h *BalanceHandler) CustomIDValidaion(ctx context.Context, i interface{}) e
 
 // UpdateUserBalance function updates the user balance information
 func (h *BalanceHandler) UpdateUserBalance(ctx context.Context, req *proto.UserUpdateRequest) (*proto.UserUpdateResponse, error) {
-	err := h.CustomIDValidaion(ctx, req.Balance.User_ID)
+	err := h.CustomIDValidaion(ctx, req.Balance.ProfileID)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"req.Balance.User_ID": req.Balance.User_ID}).Errorf("CustomValidate: %v", err)
+		logrus.WithFields(logrus.Fields{"req.Balance.User_ID": req.Balance.ProfileID}).Errorf("CustomValidate: %v", err)
 		return nil, fmt.Errorf("validate: %w", err)
 	}
-	ID, err := uuid.Parse(req.Balance.User_ID)
+	ID, err := uuid.Parse(req.Balance.ProfileID)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"req.User.Balance_ID": req.Balance.User_ID}).Errorf("Parse: %v", err)
+		logrus.WithFields(logrus.Fields{"req.User.Balance_ID": req.Balance.ProfileID}).Errorf("Parse: %v", err)
 		return nil, fmt.Errorf("parse: %w", err)
 	}
 	user := &model.Balance{
-		UserID:  ID,
-		Balance: req.Balance.Balance,
+		BalanceID: ID,
+		Balance:   req.Balance.Balance,
 	}
 	err = h.srv.UpdateBalance(ctx, user)
 	if err != nil {
@@ -78,25 +78,25 @@ func (h *BalanceHandler) UpdateUserBalance(ctx context.Context, req *proto.UserU
 
 // GetUserByID function returns a user with the given ID
 func (h *BalanceHandler) GetUserByID(ctx context.Context, req *proto.UserGetByIDRequest) (*proto.UserGetByIDResponse, error) {
-	err := h.CustomIDValidaion(ctx, req.User_ID)
+	err := h.CustomIDValidaion(ctx, req.ProfileID)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"User_ID": req.User_ID}).Errorf("Validate: %v", err)
+		logrus.WithFields(logrus.Fields{"ProfileID": req.ProfileID}).Errorf("Validate: %v", err)
 		return nil, fmt.Errorf("validate: %w", err)
 	}
-	ID, err := uuid.Parse(req.User_ID)
+	ID, err := uuid.Parse(req.ProfileID)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"req.Balance_ID": req.User_ID}).Errorf("Parse: %v", err)
+		logrus.WithFields(logrus.Fields{"req.ProfileID": req.ProfileID}).Errorf("Parse: %v", err)
 		return nil, fmt.Errorf("parse: %w", err)
 	}
 	result, err := h.srv.GetUserByID(ctx, ID)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"req.Balance_ID": req.User_ID}).Errorf("GetUserByID: %v", err)
+		logrus.WithFields(logrus.Fields{"req.Balance_ID": req.ProfileID}).Errorf("GetUserByID: %v", err)
 		return nil, fmt.Errorf("GetUserByID: %w", err)
 	}
 
 	balance := &proto.Balance{
-		User_ID: result.UserID.String(),
-		Balance: result.Balance,
+		ProfileID: result.BalanceID.String(),
+		Balance:   result.Balance,
 	}
 	return &proto.UserGetByIDResponse{Balance: balance}, nil
 }
@@ -104,8 +104,8 @@ func (h *BalanceHandler) GetUserByID(ctx context.Context, req *proto.UserGetByID
 // CreateUserBalance function creates a new user balance
 func (h *BalanceHandler) CreateUserBalance(ctx context.Context, req *proto.CreateBalanceRequest) (*proto.CreateBalanceResponse, error) {
 	user := &model.Balance{
-		UserID:  uuid.New(), //TODO: return to parsed UserID
-		Balance: req.Balance.Balance,
+		BalanceID: uuid.New(), //TODO: return to parsed UserID when Profile is ready
+		Balance:   req.Balance.Balance,
 	}
 	err := h.srv.CreateBalance(ctx, user)
 	if err != nil {
@@ -117,14 +117,14 @@ func (h *BalanceHandler) CreateUserBalance(ctx context.Context, req *proto.Creat
 
 // DeleteUserBalance deletes user's balance
 func (h *BalanceHandler) DeleteUserBalance(ctx context.Context, req *proto.DeleteBalanceRequest) (*proto.DeleteBalanceResponse, error) {
-	err := h.CustomIDValidaion(ctx, req.User_ID)
+	err := h.CustomIDValidaion(ctx, req.ProfileID)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"User_ID": req.User_ID}).Errorf("Validate: %v", err)
+		logrus.WithFields(logrus.Fields{"ProfileID": req.ProfileID}).Errorf("Validate: %v", err)
 		return nil, fmt.Errorf("validate: %w", err)
 	}
-	ID, err := uuid.Parse(req.User_ID)
+	ID, err := uuid.Parse(req.ProfileID)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"req.ID": req.User_ID}).Errorf("Parse: %v", err)
+		logrus.WithFields(logrus.Fields{"ProfileID.ID": req.ProfileID}).Errorf("Parse: %v", err)
 		return nil, fmt.Errorf("parse: %w", err)
 	}
 	err = h.srv.DeleteBalance(ctx, ID)
@@ -145,8 +145,8 @@ func (h *BalanceHandler) GetAllUserBalances(ctx context.Context, _ *proto.GetAll
 	response := []*proto.Balance{}
 	for _, user := range users {
 		response = append(response, &proto.Balance{
-			User_ID: user.UserID.String(),
-			Balance: user.Balance,
+			ProfileID: user.BalanceID.String(),
+			Balance:   user.Balance,
 		})
 	}
 	return &proto.GetAllBalanceResponse{Balances: response}, nil

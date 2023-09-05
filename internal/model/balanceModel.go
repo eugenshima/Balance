@@ -7,6 +7,7 @@ import (
 
 // Balance struct represents a user model
 type Balance struct {
-	UserID  uuid.UUID `json:"user_id"`
-	Balance float64   `json:"balance"`
+	BalanceID uuid.UUID `json:"user_id"`
+	ProfileID uuid.UUID `json:"profile_id"`
+	Balance   float64   `json:"balance"`
 }

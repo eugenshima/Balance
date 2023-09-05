@@ -51,13 +51,13 @@ func main() {
 	pgx := repository.NewPsqlConnection(pool)
 	srv := service.NewBalanceService(pgx)
 	hndl := handlers.NewBalancehandler(srv, validator.New())
-	lis, err := net.Listen("tcp", "127.0.0.1:8080")
+	lis, err := net.Listen("tcp", "127.0.0.1:8081")
 	if err != nil {
 		logrus.Fatalf("cannot create listener: %s", err)
 	}
 
 	serverRegistrar := grpc.NewServer()
-	proto.RegisterUserServiceServer(serverRegistrar, hndl)
+	proto.RegisterBalanceServiceServer(serverRegistrar, hndl)
 	err = serverRegistrar.Serve(lis)
 	if err != nil {
 		logrus.Fatalf("cannot start server: %s", err)

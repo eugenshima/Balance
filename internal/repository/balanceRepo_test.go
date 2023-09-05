@@ -14,26 +14,26 @@ import (
 var rps *PsqlConnection
 
 var testEntity = model.Balance{
-	UserID:  uuid.New(),
-	Balance: 1234.25,
+	BalanceID: uuid.New(),
+	Balance:   1234.25,
 }
 
 var wrongTestEntity = model.Balance{
-	UserID:  uuid.Nil,
-	Balance: 1234.75,
+	BalanceID: uuid.Nil,
+	Balance:   1234.75,
 }
 
 // TestPgxCreateDeleteBalance function tests create and delete methods
 func TestPgxCreateDeleteBalance(t *testing.T) {
 	err := rps.CreateBalance(context.Background(), &testEntity)
 	require.NoError(t, err)
-	err = rps.DeleteBalance(context.Background(), testEntity.UserID)
+	err = rps.DeleteBalance(context.Background(), testEntity.BalanceID)
 	require.NoError(t, err)
 }
 
 // TestPgxDeleteNilBalance function tests nil deletion of delete method
 func TestPgxDeleteNilBalance(t *testing.T) {
-	err := rps.DeleteBalance(context.Background(), wrongTestEntity.UserID)
+	err := rps.DeleteBalance(context.Background(), wrongTestEntity.BalanceID)
 	require.Error(t, err)
 }
 
@@ -44,7 +44,7 @@ func TestPgxUpdateBalance(t *testing.T) {
 	testEntity.Balance = 4321
 	err = rps.UpdateBalance(context.Background(), &testEntity)
 	require.NoError(t, err)
-	err = rps.DeleteBalance(context.Background(), testEntity.UserID)
+	err = rps.DeleteBalance(context.Background(), testEntity.BalanceID)
 	require.NoError(t, err)
 }
 
@@ -58,16 +58,16 @@ func TestPgxErrorUpdateBalance(t *testing.T) {
 func TestGetBalanceByID(t *testing.T) {
 	err := rps.CreateBalance(context.Background(), &testEntity)
 	require.NoError(t, err)
-	testResult, err := rps.GetUserByID(context.Background(), testEntity.UserID)
+	testResult, err := rps.GetUserByID(context.Background(), testEntity.BalanceID)
 	require.NoError(t, err)
 	require.NotNil(t, testResult)
-	err = rps.DeleteBalance(context.Background(), testEntity.UserID)
+	err = rps.DeleteBalance(context.Background(), testEntity.BalanceID)
 	require.NoError(t, err)
 }
 
 // TestGetBalanceByWrongID function tests error get method
 func TestGetBalanceByWrongID(t *testing.T) {
-	testResult, err := rps.GetUserByID(context.Background(), testEntity.UserID)
+	testResult, err := rps.GetUserByID(context.Background(), testEntity.BalanceID)
 	require.Error(t, err)
 	require.Nil(t, testResult)
 }

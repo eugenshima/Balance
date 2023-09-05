@@ -17,8 +17,8 @@ import (
 var (
 	mockBalanceService *mocks.BalanceService
 	mockBalanceEntity  = model.Balance{
-		UserID:  uuid.New(),
-		Balance: 1234.25,
+		BalanceID: uuid.New(),
+		Balance:   1234.25,
 	}
 )
 
@@ -44,7 +44,7 @@ func TestCreateUserBalance(t *testing.T) {
 func TestDelete(t *testing.T) {
 	mockBalanceService.On("DeleteBalance", mock.Anything, mock.AnythingOfType("uuid.UUID")).Return(nil).Once()
 
-	err := mockBalanceService.DeleteBalance(context.Background(), mockBalanceEntity.UserID)
+	err := mockBalanceService.DeleteBalance(context.Background(), mockBalanceEntity.BalanceID)
 	require.NoError(t, err)
 
 	assertion := mockBalanceService.AssertExpectations(t)
@@ -84,7 +84,7 @@ func TestUpdate(t *testing.T) {
 func TestGetByID(t *testing.T) {
 	mockBalanceService.On("GetUserByID", mock.Anything, mock.AnythingOfType("uuid.UUID")).Return(&model.Balance{}, nil).Once()
 
-	result, err := mockBalanceService.GetUserByID(context.Background(), mockBalanceEntity.UserID)
+	result, err := mockBalanceService.GetUserByID(context.Background(), mockBalanceEntity.BalanceID)
 	require.NoError(t, err)
 	require.NotNil(t, result)
 
