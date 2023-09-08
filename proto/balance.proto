@@ -1,17 +1,10 @@
 syntax = "proto3";
 option go_package = "github.com/eugenshima/Balance";
 
-message GetBalance {
+message Balance {
     string ProfileID = 1;
     double Balance = 2;
 }
-
-message Balance {
-    string ProfileID = 1;
-    string BalanceID = 2;
-    double Balance = 3;
-}
-
 
 service BalanceService {
     rpc UpdateUserBalance(UserUpdateRequest) returns (UserUpdateResponse);
@@ -22,7 +15,7 @@ service BalanceService {
 }
 
 message UserUpdateRequest {
-    GetBalance balance = 1;
+    Balance balance = 1;
 }
 
 message UserUpdateResponse {}
@@ -36,7 +29,7 @@ message UserGetByIDResponse {
 }
 
 message CreateBalanceRequest {
-    GetBalance balance = 1;
+    Balance balance = 1;
 }
 
 message CreateBalanceResponse {}

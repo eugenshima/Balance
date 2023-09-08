@@ -24,7 +24,7 @@ func NewPsqlConnection(pool *pgxpool.Pool) *PsqlConnection {
 }
 
 // GetUserByID function returns user information by ID
-func (db *PsqlConnection) GetUserByID(ctx context.Context, userID uuid.UUID) (*model.Balance, error) {
+func (db *PsqlConnection) GetUserByID(ctx context.Context, profileID uuid.UUID) (*model.Balance, error) {
 	tx, err := db.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: "repeatable read"})
 	if err != nil {
 		return nil, fmt.Errorf("BeginTx: %w", err)
@@ -44,12 +44,12 @@ func (db *PsqlConnection) GetUserByID(ctx context.Context, userID uuid.UUID) (*m
 			}
 		}
 	}()
-	var user model.Balance
-	err = tx.QueryRow(ctx, "SELECT user_id, balance FROM shares.balance WHERE user_id = $1", userID).Scan(&user.BalanceID, &user.Balance)
-	if err != nil || user.BalanceID == uuid.Nil {
+	var profile model.Balance
+	err = tx.QueryRow(ctx, "SELECT profile_id, balance FROM shares.balance WHERE profile_id = $1", profileID).Scan(&profile.BalanceID, &profile.Balance)
+	if err != nil || profile.BalanceID == uuid.Nil {
 		return nil, fmt.Errorf("QueryRow(): %w", err)
 	}
-	return &user, nil
+	return &profile, nil
 }
 
 // GetAll function executes SQL request to select all rows from Database
@@ -73,7 +73,7 @@ func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.Balance, error) 
 			}
 		}
 	}()
-	rows, err := tx.Query(ctx, "SELECT user_id, balance FROM shares.balance")
+	rows, err := tx.Query(ctx, "SELECT balance_id, profile_id, balance FROM shares.balance")
 	if err != nil {
 		return nil, fmt.Errorf("Query(): %w", err)
 	}
@@ -85,7 +85,7 @@ func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.Balance, error) 
 	// go through each line
 	for rows.Next() {
 		user := &model.Balance{}
-		err := rows.Scan(&user.BalanceID, &user.Balance)
+		err := rows.Scan(&user.BalanceID, &user.ProfileID, &user.Balance)
 		if err != nil {
 			return nil, fmt.Errorf("Scan(): %w", err) // Returning error message
 		}
@@ -95,7 +95,7 @@ func (db *PsqlConnection) GetAll(ctx context.Context) ([]*model.Balance, error) 
 }
 
 // UpdateBalance function updates user's balance information
-func (db *PsqlConnection) UpdateBalance(ctx context.Context, user *model.Balance) error {
+func (db *PsqlConnection) UpdateBalance(ctx context.Context, balance *model.Balance) error {
 	tx, err := db.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: "repeatable read"})
 	if err != nil {
 		return fmt.Errorf("BeginTx: %w", err)
@@ -115,7 +115,11 @@ func (db *PsqlConnection) UpdateBalance(ctx context.Context, user *model.Balance
 			}
 		}
 	}()
-	tag, err := tx.Exec(ctx, "UPDATE shares.balance SET balance = $1 WHERE user_id = $2", user.Balance, user.BalanceID)
+	err = tx.QueryRow(ctx, "SELECT balance_id FROM shares.balance WHERE profile_id = $1", balance.ProfileID).Scan(&balance.BalanceID)
+	if err != nil || balance.ProfileID == uuid.Nil {
+		return fmt.Errorf("QueryRow(): %w", err)
+	}
+	tag, err := tx.Exec(ctx, "UPDATE shares.balance SET balance = $1 WHERE balance_id = $2", balance.Balance, balance.BalanceID)
 	if err != nil || tag.RowsAffected() == 0 {
 		return fmt.Errorf("exec: %w", err)
 	}
@@ -123,7 +127,7 @@ func (db *PsqlConnection) UpdateBalance(ctx context.Context, user *model.Balance
 }
 
 // CreateBalance function creates user's balance
-func (db *PsqlConnection) CreateBalance(ctx context.Context, user *model.Balance) error {
+func (db *PsqlConnection) CreateBalance(ctx context.Context, balance *model.Balance) error {
 	tx, err := db.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: "repeatable read"})
 	if err != nil {
 		return fmt.Errorf("BeginTx: %w", err)
@@ -143,7 +147,7 @@ func (db *PsqlConnection) CreateBalance(ctx context.Context, user *model.Balance
 			}
 		}
 	}()
-	_, err = tx.Exec(ctx, "INSERT INTO shares.balance VALUES ($1, $2)", user.BalanceID, user.Balance)
+	_, err = tx.Exec(ctx, "INSERT INTO shares.balance VALUES ($1, $2, $3)", balance.BalanceID, balance.ProfileID, balance.Balance)
 	if err != nil {
 		return fmt.Errorf("exec: %w", err)
 	}
@@ -151,7 +155,7 @@ func (db *PsqlConnection) CreateBalance(ctx context.Context, user *model.Balance
 }
 
 // DeleteBalance function deletes user's balance
-func (db *PsqlConnection) DeleteBalance(ctx context.Context, userID uuid.UUID) error {
+func (db *PsqlConnection) DeleteBalance(ctx context.Context, ProfileID uuid.UUID) error {
 	tx, err := db.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: "repeatable read"})
 	if err != nil {
 		return fmt.Errorf("BeginTx: %w", err)
@@ -171,7 +175,12 @@ func (db *PsqlConnection) DeleteBalance(ctx context.Context, userID uuid.UUID) e
 			}
 		}
 	}()
-	tag, err := tx.Exec(ctx, "DELETE FROM shares.balance WHERE user_id = $1", userID)
+	balanceID := uuid.New()
+	err = tx.QueryRow(ctx, "SELECT balance_id FROM shares.balance WHERE profile_id = $1", ProfileID).Scan(&balanceID)
+	if err != nil || ProfileID == uuid.Nil {
+		return fmt.Errorf("QueryRow(): %w", err)
+	}
+	tag, err := tx.Exec(ctx, "DELETE FROM shares.balance WHERE balance_id = $1", balanceID)
 	if err != nil || tag.RowsAffected() == 0 {
 		return fmt.Errorf("exec: %w", err)
 	}

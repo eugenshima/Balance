@@ -23,7 +23,7 @@ func NewBalanceService(rps BalanceRepository) *BalanceService {
 type BalanceRepository interface {
 	GetAll(ctx context.Context) ([]*model.Balance, error)
 	UpdateBalance(ctx context.Context, user *model.Balance) error
-	GetUserByID(ctx context.Context, userID uuid.UUID) (*model.Balance, error)
+	GetUserByID(ctx context.Context, profile_id uuid.UUID) (*model.Balance, error)
 	CreateBalance(ctx context.Context, user *model.Balance) error
 	DeleteBalance(ctx context.Context, userID uuid.UUID) error
 }
