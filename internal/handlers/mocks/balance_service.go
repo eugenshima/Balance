@@ -7,7 +7,7 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
-	model "github.com/eugenshima/Balance/internal/model"
+	model "github.com/eugenshima/balance/internal/model"
 
 	uuid "github.com/google/uuid"
 )
