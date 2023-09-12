@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eugenshima/Balance/internal/model"
+	"github.com/eugenshima/balance/internal/model"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"

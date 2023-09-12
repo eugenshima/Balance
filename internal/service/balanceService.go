@@ -4,7 +4,7 @@ package service
 import (
 	"context"
 
-	"github.com/eugenshima/Balance/internal/model"
+	"github.com/eugenshima/balance/internal/model"
 
 	"github.com/google/uuid"
 )

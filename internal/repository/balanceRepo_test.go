@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/eugenshima/Balance/internal/model"
+	"github.com/eugenshima/balance/internal/model"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"

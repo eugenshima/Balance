@@ -1,4 +1,4 @@
-module github.com/eugenshima/Balance
+module github.com/eugenshima/balance
 
 go 1.18
 

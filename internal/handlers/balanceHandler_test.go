@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/eugenshima/Balance/internal/handlers/mocks"
-	"github.com/eugenshima/Balance/internal/model"
+	"github.com/eugenshima/balance/internal/handlers/mocks"
+	"github.com/eugenshima/balance/internal/model"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"

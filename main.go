@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"net"
 
-	cfgrtn "github.com/eugenshima/Balance/internal/config"
-	"github.com/eugenshima/Balance/internal/handlers"
-	"github.com/eugenshima/Balance/internal/repository"
-	"github.com/eugenshima/Balance/internal/service"
-	proto "github.com/eugenshima/Balance/proto"
+	cfgrtn "github.com/eugenshima/balance/internal/config"
+	"github.com/eugenshima/balance/internal/handlers"
+	"github.com/eugenshima/balance/internal/repository"
+	"github.com/eugenshima/balance/internal/service"
+	proto "github.com/eugenshima/balance/proto"
 
 	"github.com/go-playground/validator"
 	"github.com/jackc/pgx/v4/pgxpool"

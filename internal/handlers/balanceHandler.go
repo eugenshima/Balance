@@ -5,8 +5,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eugenshima/Balance/internal/model"
-	proto "github.com/eugenshima/Balance/proto"
+	"github.com/eugenshima/balance/internal/model"
+	proto "github.com/eugenshima/balance/proto"
 
 	vld "github.com/go-playground/validator"
 	"github.com/google/uuid"
