@@ -44,12 +44,12 @@ func (db *PsqlConnection) GetUserByID(ctx context.Context, profileID uuid.UUID) 
 			}
 		}
 	}()
-	var profile model.Balance
-	err = tx.QueryRow(ctx, "SELECT profile_id, balance FROM shares.balance WHERE profile_id = $1", profileID).Scan(&profile.BalanceID, &profile.Balance)
-	if err != nil || profile.BalanceID == uuid.Nil {
+	var balance model.Balance
+	err = tx.QueryRow(ctx, "SELECT balance_id, profile_id, balance FROM shares.balance WHERE profile_id = $1", profileID).Scan(&balance.BalanceID, &balance.ProfileID, &balance.Balance)
+	if err != nil || balance.BalanceID == uuid.Nil {
 		return nil, fmt.Errorf("QueryRow(): %w", err)
 	}
-	return &profile, nil
+	return &balance, nil
 }
 
 // GetAll function executes SQL request to select all rows from Database

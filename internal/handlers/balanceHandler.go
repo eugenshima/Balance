@@ -95,7 +95,8 @@ func (h *BalanceHandler) GetUserByID(ctx context.Context, req *proto.UserGetByID
 	}
 
 	balance := &proto.Balance{
-		ProfileID: result.BalanceID.String(),
+		BalanceID: result.BalanceID.String(),
+		ProfileID: result.ProfileID.String(),
 		Balance:   result.Balance,
 	}
 	return &proto.UserGetByIDResponse{Balance: balance}, nil
